@@ -18,6 +18,12 @@
 
 ### 1.1 인증 방식 선택 및 검증
 
+**왜 필요한가?**
+- **다양한 사용 환경 지원**: 개발자마다 다른 인증 환경 (개인 API 키, 회사 OAuth, 클라우드 환경)
+- **보안 강화**: 각 환경에 맞는 최적의 보안 방식 제공
+- **사용자 경험**: 복잡한 인증 설정 없이 바로 사용 가능
+- **엔터프라이즈 지원**: 회사 정책에 맞는 인증 방식 선택 가능
+
 Gemini CLI는 4가지 인증 방식을 지원합니다:
 
 - `LOGIN_WITH_GOOGLE`: Google OAuth 로그인 (Gemini Code Assist)
@@ -64,6 +70,12 @@ export const validateAuthMethod = (authMethod: string): string | null => {
 ```
 
 ### 1.2 ContentGenerator 생성
+
+**왜 필요한가?**
+- **추상화 레이어**: 서로 다른 API 엔드포인트를 동일한 인터페이스로 통합
+- **유연성**: 인증 방식 변경 시 상위 로직은 그대로 유지
+- **확장성**: 새로운 LLM 서비스 추가 시 ContentGenerator 인터페이스만 구현하면 됨
+- **설정 중앙화**: 모든 API 관련 설정을 한 곳에서 관리
 
 인증 방식에 따라 적절한 ContentGenerator를 생성합니다.
 
@@ -168,6 +180,12 @@ export async function createContentGenerator(
 
 ### 1.3 OAuth 인증용 CodeAssist ContentGenerator
 
+**왜 필요한가?**
+- **엔터프라이즈 지원**: 회사에서 관리하는 OAuth 토큰으로 안전한 액세스
+- **고급 기능**: Google Code Assist의 고급 기능 (더 큰 컨텍스트, Pro 모델 등)
+- **자동 토큰 관리**: 토큰 갱신, 만료 처리 자동화
+- **프로젝트 연동**: Google Cloud 프로젝트와 연결된 기능 사용
+
 **파일:** `packages/core/src/code_assist/codeAssist.ts`
 
 ```typescript
@@ -202,6 +220,12 @@ export async function createCodeAssistContentGenerator(
 ## 2. 클라이언트 초기화 단계
 
 ### 2.1 GeminiClient 초기화
+
+**왜 필요한가?**
+- **상태 관리**: 대화 세션, 설정, 도구들의 중앙 관리
+- **프록시 지원**: 기업 환경의 네트워크 제한 대응
+- **세션 격리**: 여러 대화 세션 간 독립성 보장
+- **루프 감지**: 무한 도구 호출 방지
 
 **파일:** `packages/core/src/core/client.ts`
 
@@ -238,6 +262,12 @@ export class GeminiClient {
 ```
 
 ### 2.2 Chat 세션 시작
+
+**왜 필요한가?**
+- **컨텍스트 연속성**: 대화 히스토리를 통한 문맥 유지
+- **도구 등록**: 모델이 사용할 수 있는 함수들 사전 정의
+- **시스템 프롬프트**: 모델의 동작 방식 및 역할 정의
+- **Thinking 지원**: 지원하는 모델에서 사고 과정 표시
 
 **파일:** `packages/core/src/core/client.ts`
 
@@ -298,6 +328,12 @@ async startChat(extraHistory?: Content[]): Promise<GeminiChat> {
 
 ### 3.1 대화형 모드 시작
 
+**왜 필요한가?**
+- **사용자 경험**: TTY 환경에서 실시간 대화형 인터페이스 제공
+- **유연한 실행**: 대화형/비대화형 모드 자동 감지
+- **React UI**: 풍부한 UI 컴포넌트로 더 나은 사용자 경험
+- **메모리 관리**: 장시간 실행 시 메모리 최적화
+
 **파일:** `packages/cli/src/gemini.tsx`
 
 ```typescript
@@ -338,6 +374,12 @@ export async function main() {
 ```
 
 ### 3.2 비대화형 모드 실행
+
+**왜 필요한가?**
+- **스크립트 통합**: CI/CD 파이프라인, 배치 작업에서 사용
+- **턴 제한**: 무한 루프 방지 및 비용 제어
+- **스트리밍 출력**: 실시간 응답 표시로 사용자 경험 향상
+- **자동 도구 실행**: 사용자 개입 없이 연속적인 작업 수행
 
 **파일:** `packages/cli/src/nonInteractiveCli.ts`
 
@@ -406,6 +448,12 @@ export async function runNonInteractive(
 ## 4. API 요청 준비
 
 ### 4.1 메시지 전송 준비
+
+**왜 필요한가?**
+- **로깅**: 디버깅 및 사용 분석을 위한 API 요청 기록
+- **모델 선택**: 동적 모델 변경 및 폴백 지원
+- **할당량 관리**: 사용량 초과 시 적절한 모델로 전환
+- **재시도 준비**: 실패 시 자동 재시도를 위한 설정
 
 **파일:** `packages/core/src/core/geminiChat.ts`
 
@@ -483,6 +531,12 @@ async sendMessage(
 ## 5. 실제 API 호출
 
 ### 5.1 OAuth 방식 - CodeAssistServer
+
+**왜 필요한가?**
+- **스트리밍 지원**: SSE(Server-Sent Events)로 실시간 응답 표시
+- **인증 헤더**: OAuth 토큰을 통한 안전한 API 액세스
+- **에러 파싱**: 스트리밍 환경에서의 정확한 에러 처리
+- **프로젝트 연동**: Google Cloud 프로젝트별 설정 및 권한 관리
 
 **파일:** `packages/core/src/code_assist/server.ts`
 
@@ -623,6 +677,12 @@ User-Agent: GeminiCLI/0.1.13 (win32; x64)
 
 ### 5.2 API 키 방식 - GoogleGenAI
 
+**왜 필요한가?**
+- **간편한 설정**: API 키만으로 빠른 시작 가능
+- **직접 액세스**: Google의 공식 SDK를 통한 안정적인 연결
+- **비용 투명성**: 개인 API 키로 사용량 직접 관리
+- **개발 환경**: 프로토타이핑 및 개인 프로젝트에 적합
+
 API 키를 사용할 때는 `@google/genai` 패키지가 내부적으로 다음과 같은 HTTP 요청을 실행합니다:
 
 **실제 API 키 HTTP 요청 예시:**
@@ -651,6 +711,12 @@ User-Agent: GeminiCLI/0.1.13 (win32; x64)
 ```
 
 ### 5.3 재시도 로직
+
+**왜 필요한가?**
+- **안정성**: 일시적인 네트워크 오류나 서버 과부하 상황 대응
+- **할당량 관리**: 사용량 초과 시 자동 모델 전환으로 서비스 연속성
+- **비용 최적화**: Pro 모델에서 Flash 모델로 폴백하여 비용 절약
+- **사용자 경험**: 수동 재시도 없이 자동으로 문제 해결
 
 **파일:** `packages/core/src/utils/retry.ts`
 
@@ -760,6 +826,12 @@ export async function retryWithBackoff<T>(
 
 ### 6.1 스트리밍 응답 처리
 
+**왜 필요한가?**
+- **실시간성**: 긴 응답도 즉시 표시 시작으로 체감 속도 향상
+- **취소 가능**: 사용자가 중간에 응답을 취소할 수 있음
+- **메모리 효율**: 전체 응답을 메모리에 저장하지 않고 청크 단위 처리
+- **에러 복구**: 부분 응답이라도 사용자에게 유용한 정보 제공
+
 **파일:** `packages/core/src/core/geminiChat.ts`
 
 ```typescript
@@ -861,6 +933,12 @@ private async *processStreamResponse(
 
 ### 6.2 히스토리 관리
 
+**왜 필요한가?**
+- **컨텍스트 유지**: 이전 대화 내용을 기억하여 연속성 있는 대화
+- **중복 제거**: 인접한 동일 역할의 메시지 통합으로 토큰 절약
+- **Thinking 필터링**: 사고 과정은 표시하되 히스토리에는 저장하지 않음
+- **함수 호출 기록**: 도구 실행 결과를 포함한 완전한 대화 흐름 보존
+
 **파일:** `packages/core/src/core/geminiChat.ts`
 
 ```typescript
@@ -931,6 +1009,12 @@ private recordHistory(
 ## 7. 도구 호출 처리
 
 ### 7.1 Turn 클래스에서의 도구 실행
+
+**왜 필요한가?**
+- **기능 확장**: LLM이 파일 시스템, 웹 검색 등 외부 도구 사용 가능
+- **실시간 피드백**: 도구 실행 중에도 사용자에게 진행 상황 표시
+- **안전한 실행**: 도구 호출을 격리하여 시스템 보안 유지
+- **취소 지원**: 장시간 실행되는 도구도 중간에 취소 가능
 
 **파일:** `packages/core/src/core/turn.ts`
 
@@ -1043,6 +1127,12 @@ export class Turn {
 
 ### 7.2 비대화형 모드에서의 도구 실행
 
+**왜 필요한가?**
+- **자동화**: 사용자 개입 없이 연속적인 작업 체인 실행
+- **배치 처리**: 스크립트나 CI/CD에서 도구를 활용한 복합 작업
+- **결과 연결**: 이전 도구의 결과를 다음 LLM 호출에 자동 반영
+- **에러 전파**: 도구 실행 실패 시 적절한 에러 메시지 전달
+
 **파일:** `packages/cli/src/nonInteractiveCli.ts`
 
 ```typescript
@@ -1087,6 +1177,12 @@ if (functionCalls.length > 0) {
 ## 8. 텔레메트리 및 로깅
 
 ### 8.1 API 요청/응답 로깅
+
+**왜 필요한가?**
+- **디버깅**: API 호출 문제 발생 시 상세한 로그로 원인 파악
+- **사용 분석**: 어떤 모델과 기능이 많이 사용되는지 통계 수집
+- **성능 모니터링**: 응답 시간, 토큰 사용량 등 성능 지표 추적
+- **비용 관리**: API 사용량 기반의 비용 예측 및 최적화
 
 **파일:** `packages/core/src/core/geminiChat.ts`
 
@@ -1145,6 +1241,12 @@ private _logApiError(
 ```
 
 ### 8.2 텔레메트리 이벤트 타입
+
+**왜 필요한가?**
+- **구조화된 데이터**: 일관된 형식으로 분석 도구에서 쉽게 처리
+- **타임스탬프**: 시간 기반 분석 및 성능 추적
+- **분류**: 요청/응답/에러별로 다른 분석 및 알림 정책 적용
+- **메타데이터**: 모델, 인증 방식 등 컨텍스트 정보 보존
 
 **파일:** `packages/core/src/telemetry/types.ts`
 
@@ -1278,3 +1380,237 @@ processStreamResponse() → recordHistory()
 - **샌드박스**: 도구 실행을 위한 격리된 환경 제공
 
 이 전체 플로우는 확장 가능하고 견고한 아키텍처를 통해 다양한 인증 방식과 사용 사례를 지원하며, 에러 상황에서도 안정적으로 동작하도록 설계되었습니다.
+
+## 10. 구현 단계별 가이드
+
+### 10.1 1단계: 기본 인프라 구축
+
+**우선순위가 높은 이유**: 모든 상위 기능의 기반이 되는 핵심 컴포넌트
+
+1. **ContentGenerator 인터페이스 정의**
+   ```typescript
+   interface ContentGenerator {
+     generateContent(req: GenerateContentParameters): Promise<GenerateContentResponse>;
+     generateContentStream(req: GenerateContentParameters): AsyncGenerator<GenerateContentResponse>;
+   }
+   ```
+
+2. **기본 설정 시스템 구현**
+   - 환경 변수 로딩
+   - 설정 파일 파싱
+   - 기본값 정의
+
+3. **에러 처리 시스템 구현**
+   - 구조화된 에러 타입 정의
+   - 에러 로깅 유틸리티
+   - 기본 재시도 로직
+
+### 10.2 2단계: 단일 인증 방식 구현
+
+**우선순위가 높은 이유**: 가장 간단한 방식부터 시작하여 기본 플로우 검증
+
+1. **API 키 방식 먼저 구현** (OAuth보다 단순)
+   - GoogleGenAI ContentGenerator 구현
+   - 환경 변수에서 API 키 읽기
+   - 기본 HTTP 요청/응답 처리
+
+2. **기본 GeminiClient 클래스**
+   ```typescript
+   class GeminiClient {
+     constructor(config: Config)
+     initialize(contentGeneratorConfig: ContentGeneratorConfig)
+     sendMessage(message: string): Promise<string>
+   }
+   ```
+
+3. **단순한 CLI 인터페이스**
+   - 명령행 인자 파싱
+   - 단일 질문-답변 처리
+   - 기본 출력 형식
+
+### 10.3 3단계: 스트리밍 기능 추가
+
+**우선순위가 높은 이유**: 사용자 경험에 큰 영향을 미치는 핵심 기능
+
+1. **스트리밍 응답 처리**
+   ```typescript
+   async *generateContentStream(): AsyncGenerator<GenerateContentResponse> {
+     // 청크 단위 응답 처리
+   }
+   ```
+
+2. **실시간 출력 시스템**
+   - 터미널에 실시간 텍스트 출력
+   - 취소 신호 처리 (AbortController)
+   - 진행 상황 표시
+
+3. **기본 에러 복구**
+   - 스트리밍 중 연결 끊김 처리
+   - 부분 응답 저장 및 복구
+
+### 10.4 4단계: 대화 히스토리 시스템
+
+**우선순위가 높은 이유**: 실용적인 대화형 AI를 위한 필수 기능
+
+1. **GeminiChat 클래스 구현**
+   ```typescript
+   class GeminiChat {
+     private history: Content[] = [];
+     sendMessage(message: string): Promise<GenerateContentResponse>
+     sendMessageStream(message: string): AsyncGenerator<GenerateContentResponse>
+   }
+   ```
+
+2. **히스토리 관리 로직**
+   - 사용자/모델 메시지 저장
+   - 컨텍스트 윈도우 관리
+   - 중복 메시지 통합
+
+3. **시스템 프롬프트 지원**
+   - 역할 정의 및 지시사항
+   - 모델별 최적화된 프롬프트
+
+### 10.5 5단계: 도구 호출 시스템
+
+**우선순위가 중간인 이유**: 고급 기능이지만 실용성을 크게 높임
+
+1. **ToolRegistry 구현**
+   ```typescript
+   class ToolRegistry {
+     registerTool(tool: Tool): void
+     getFunctionDeclarations(): FunctionDeclaration[]
+     executeTool(name: string, args: object): Promise<ToolResult>
+   }
+   ```
+
+2. **기본 도구들 구현**
+   - 파일 읽기/쓰기 도구
+   - 디렉토리 나열 도구
+   - 간단한 검색 도구
+
+3. **도구 실행 엔진**
+   - 안전한 함수 호출
+   - 결과 검증 및 포맷팅
+   - 에러 처리 및 복구
+
+### 10.6 6단계: OAuth 인증 추가
+
+**우선순위가 중간인 이유**: 엔터프라이즈 사용자를 위한 중요하지만 복잡한 기능
+
+1. **OAuth 클라이언트 구현**
+   - Google OAuth 2.0 플로우
+   - 토큰 저장 및 갱신
+   - 권한 스코프 관리
+
+2. **CodeAssistServer ContentGenerator**
+   ```typescript
+   class CodeAssistServer implements ContentGenerator {
+     constructor(authClient: OAuth2Client, projectId: string)
+     requestPost<T>(method: string, req: object): Promise<T>
+     requestStreamingPost<T>(method: string, req: object): AsyncGenerator<T>
+   }
+   ```
+
+3. **인증 플로우 통합**
+   - 브라우저 기반 인증
+   - 토큰 캐시 관리
+   - 만료 시 자동 갱신
+
+### 10.7 7단계: 고급 에러 처리 및 재시도
+
+**우선순위가 중간인 이유**: 안정성 향상을 위한 중요한 기능
+
+1. **재시도 로직 고도화**
+   ```typescript
+   async function retryWithBackoff<T>(
+     fn: () => Promise<T>,
+     options: RetryOptions
+   ): Promise<T>
+   ```
+
+2. **모델 폴백 시스템**
+   - 할당량 초과 시 Flash 모델로 전환
+   - 모델별 기능 호환성 검사
+   - 비용 최적화 로직
+
+3. **네트워크 에러 처리**
+   - 연결 타임아웃 관리
+   - 프록시 지원
+   - DNS 해결 실패 처리
+
+### 10.8 8단계: 사용자 인터페이스 개선
+
+**우선순위가 낮은 이유**: 기능적으로는 완성되었으나 사용자 경험 향상
+
+1. **React 기반 터미널 UI**
+   - Ink 라이브러리 활용
+   - 대화형 컴포넌트
+   - 키보드 단축키 지원
+
+2. **테마 및 커스터마이제이션**
+   - 색상 테마 지원
+   - 출력 형식 옵션
+   - 폰트 및 레이아웃 설정
+
+3. **진행 상황 표시**
+   - 로딩 애니메이션
+   - 진행률 바
+   - 상태 메시지
+
+### 10.9 9단계: 텔레메트리 및 로깅
+
+**우선순위가 낮은 이유**: 운영 및 디버깅을 위한 부가 기능
+
+1. **로깅 시스템 구축**
+   ```typescript
+   class TelemetryLogger {
+     logApiRequest(event: ApiRequestEvent): void
+     logApiResponse(event: ApiResponseEvent): void
+     logApiError(event: ApiErrorEvent): void
+   }
+   ```
+
+2. **메트릭 수집**
+   - 사용량 통계
+   - 성능 지표
+   - 에러 발생률
+
+3. **로그 저장 및 분석**
+   - 로컬 파일 저장
+   - 클라우드 전송 (선택적)
+   - 대시보드 연동
+
+### 10.10 10단계: 최적화 및 고급 기능
+
+**우선순위가 가장 낮은 이유**: 기본 기능이 완성된 후 성능 및 고급 사용자를 위한 기능
+
+1. **성능 최적화**
+   - 응답 캐싱
+   - 토큰 사용량 최적화
+   - 메모리 사용량 관리
+
+2. **고급 설정 옵션**
+   - 커스텀 모델 파라미터
+   - 고급 프롬프트 엔지니어링
+   - 플러그인 시스템
+
+3. **통합 및 확장성**
+   - VS Code 확장
+   - API 서버 모드
+   - 다른 도구와의 연동
+
+### 구현 팁
+
+**핵심 원칙:**
+1. **점진적 개발**: 각 단계는 독립적으로 테스트 가능해야 함
+2. **테스트 우선**: 각 컴포넌트는 단위 테스트와 함께 개발
+3. **설정 가능**: 하드코딩 대신 설정으로 동작 변경 가능
+4. **에러 처리**: 모든 외부 호출에 적절한 에러 처리 포함
+
+**개발 순서의 이유:**
+- 1-3단계: 기본 동작하는 MVP 완성
+- 4-5단계: 실용적인 기능 추가로 사용자 가치 제공
+- 6-7단계: 엔터프라이즈 및 안정성 요구사항 충족
+- 8-10단계: 사용자 경험 및 운영 효율성 향상
+
+이런 단계별 접근을 통해 각 단계마다 동작하는 제품을 확보하면서, 점진적으로 기능을 확장할 수 있습니다.
